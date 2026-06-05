@@ -1,10 +1,12 @@
 import os
-from dotenv import load_dotenv
+import sys
+
+os.chdir('/home/Karan18singh/MediSense-AI')
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import numpy as np
 import joblib
-import tensorflow as tf
 from PIL import Image
 import io
 import base64
@@ -12,27 +14,54 @@ import warnings
 from groq import Groq
 warnings.filterwarnings('ignore')
 
-load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
 # Groq Client
-groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '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')
+groq_client = Groq(api_key=GROQ_API_KEY)
 
-# Prediction history storage
 prediction_history = []
 
-# Load all models
+# Load models
 print("Loading models...")
-diabetes_model = joblib.load('models/diabetes_model.pkl')
-heart_model = joblib.load('models/heart_model.pkl')
-kidney_model = joblib.load('models/kidney_model.pkl')
-xray_model = tf.keras.models.load_model('models/xray_model.h5')
-print("✅ All models loaded!")
+try:
+    diabetes_model = joblib.load('models/diabetes_model.pkl')
+    print("✅ Diabetes model loaded!")
+except Exception as e:
+    print(f"❌ Diabetes model error: {e}")
+    diabetes_model = None
+
+try:
+    heart_model = joblib.load('models/heart_model.pkl')
+    print("✅ Heart model loaded!")
+except Exception as e:
+    print(f"❌ Heart model error: {e}")
+    heart_model = None
+
+try:
+    kidney_model = joblib.load('models/kidney_model.pkl')
+    print("✅ Kidney model loaded!")
+except Exception as e:
+    print(f"❌ Kidney model error: {e}")
+    kidney_model = None
+
+xray_model = None
+print("⚠️ X-Ray model skipped (TensorFlow not available)")
+print("✅ All available models loaded!")
 
 @app.route('/')
 def home():
-    return jsonify({"message": "MediSense AI Backend Running!", "status": "success"})
+    return jsonify({
+        "message": "MediSense AI Backend Running!",
+        "status": "success",
+        "models": {
+            "diabetes": diabetes_model is not None,
+            "heart": heart_model is not None,
+            "kidney": kidney_model is not None,
+            "xray": xray_model is not None
+        }
+    })
 
 @app.route('/history', methods=['GET'])
 def get_history():
@@ -46,6 +75,8 @@ def add_history():
 
 @app.route('/predict/diabetes', methods=['POST'])
 def predict_diabetes():
+    if diabetes_model is None:
+        return jsonify({"error": "Model not available"}), 500
     data = request.json
     features = np.array([[
         data['pregnancies'], data['glucose'],
@@ -66,6 +97,8 @@ def predict_diabetes():
 
 @app.route('/predict/heart', methods=['POST'])
 def predict_heart():
+    if heart_model is None:
+        return jsonify({"error": "Model not available"}), 500
     data = request.json
     features = np.array([[
         data['age'], data['sex'], data['cp'],
@@ -86,6 +119,8 @@ def predict_heart():
 
 @app.route('/predict/kidney', methods=['POST'])
 def predict_kidney():
+    if kidney_model is None:
+        return jsonify({"error": "Model not available"}), 500
     data = request.json
     features = np.array([[
         data['age'], data['bp'], data['sg'],
@@ -110,25 +145,13 @@ def predict_kidney():
 
 @app.route('/predict/xray', methods=['POST'])
 def predict_xray():
-    data = request.json
-    image_data = base64.b64decode(data['image'])
-    image = Image.open(io.BytesIO(image_data)).convert('RGB')
-    image = image.resize((150, 150))
-    image_array = np.array(image) / 255.0
-    image_array = np.expand_dims(image_array, axis=0)
-    prediction = xray_model.predict(image_array)[0][0]
-    result_text = "Pneumonia Detected" if prediction > 0.5 else "Normal"
-    confidence = round(float(prediction) * 100 if prediction > 0.5 else (1 - float(prediction)) * 100, 2)
-    result = {
+    return jsonify({
         "type": "X-Ray",
-        "prediction": float(prediction),
-        "result": result_text,
-        "confidence": confidence
-    }
-    prediction_history.append(result)
-    return jsonify(result)
+        "result": "X-Ray analysis available on local version only",
+        "confidence": 0,
+        "prediction": 0
+    })
 
-# Test route
 @app.route('/test-groq')
 def test_groq():
     try:
@@ -141,7 +164,6 @@ def test_groq():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
-# Chat route
 @app.route('/chat', methods=['POST'])
 def chat():
     try:
