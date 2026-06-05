@@ -1,6 +1,8 @@
 # Python
 backend/venv/
 backend/.venv/
+.venv/
+venv/
 __pycache__/
 *.pyc
 *.pyo
@@ -12,8 +14,13 @@ frontend/node_modules/
 datasets/
 models/
 
+# API Keys - Never push these!
+.env
+backend/.env
+*.env
+
 # VS Code
 .vscode/
 
-# Environment
-.env
+# Misc
+.DS_Store

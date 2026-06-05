@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import numpy as np
@@ -10,11 +12,12 @@ import warnings
 from groq import Groq
 warnings.filterwarnings('ignore')
 
+load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
 # Groq Client
-groq_client = Groq(api_key="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")
+groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # Prediction history storage
 prediction_history = []
