@@ -1,0 +1,19 @@
+# Python
+backend/venv/
+backend/.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Node
+frontend/node_modules/
+
+# Large files
+datasets/
+models/
+
+# VS Code
+.vscode/
+
+# Environment
+.env
