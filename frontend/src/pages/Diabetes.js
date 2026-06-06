@@ -19,7 +19,7 @@ function Diabetes() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/predict/diabetes', {
+      const response = await axios.post('https://karan18singh.pythonanywhere.com/predict/diabetes', {
         pregnancies: parseFloat(formData.pregnancies),
         glucose: parseFloat(formData.glucose),
         bloodpressure: parseFloat(formData.bloodpressure),

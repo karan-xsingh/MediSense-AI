@@ -18,7 +18,7 @@ function Dashboard() {
 
   const fetchHistory = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/history');
+      const response = await axios.get('https://karan18singh.pythonanywhere.com/history');
       setHistory(response.data);
     } catch (error) {
       console.error('Error fetching history');
