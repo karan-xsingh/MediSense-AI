@@ -1,3 +1,4 @@
+import { useLanguage } from '../context/LanguageContext';
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 
@@ -18,6 +19,34 @@ function Chatbot() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const { language } = useLanguage();
+
+  const startVoice = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Voice not supported on this browser. Try Chrome!');
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = language === 'hi' ? 'hi-IN' : 'en-IN';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
+
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -134,11 +163,24 @@ function Chatbot() {
           {messages.length <= 1 && (
             <div style={{ padding: '0 16px 12px', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
               {suggestions.map((s, i) => (
-                <button key={i} className="suggest-btn" onClick={() => sendMessage(s)} style={{
-                  padding: '5px 12px', borderRadius: '100px', fontSize: '11px', fontWeight: 500,
-                  background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)',
-                  color: '#a5b4fc', cursor: 'pointer', transition: 'all 0.2s'
-                }}>{s}</button>
+                <button
+                  key={i}
+                  className="suggest-btn"
+                  onClick={() => sendMessage(s)}
+                  style={{
+                    padding: '5px 12px',
+                    borderRadius: '100px',
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    background: 'rgba(99,102,241,0.1)',
+                    border: '1px solid rgba(99,102,241,0.25)',
+                    color: '#a5b4fc',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {s}
+                </button>
               ))}
             </div>
           )}
@@ -148,24 +190,56 @@ function Chatbot() {
             <input
               className="chat-input"
               value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && sendMessage()}
-              placeholder="Ask about your health..."
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+              placeholder={language === 'hi' ? 'अपना सवाल पूछें...' : 'Ask about your health...'}
               style={{
-                flex: 1, background: 'rgba(255,255,255,0.06)',
+                flex: 1,
+                background: 'rgba(255,255,255,0.06)',
                 border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '12px', padding: '10px 14px',
-                color: '#fff', fontSize: '13px',
+                borderRadius: '12px',
+                padding: '10px 14px',
+                color: '#fff',
+                fontSize: '13px',
                 transition: 'border-color 0.2s'
               }}
             />
-            <button className="send-btn" onClick={() => sendMessage()} style={{
-              width: '40px', height: '40px', borderRadius: '12px',
-              background: 'linear-gradient(135deg,#6366f1,#8b5cf6)',
-              border: 'none', color: '#fff', fontSize: '16px',
-              cursor: 'pointer', transition: 'all 0.2s',
-              flexShrink: 0
-            }}>→</button>
+            <button
+              onClick={startVoice}
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '12px',
+                background: isListening ? 'linear-gradient(135deg,#ef4444,#f87171)' : 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: '#fff',
+                fontSize: '16px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                flexShrink: 0,
+                animation: isListening ? 'pulse 1s infinite' : 'none'
+              }}
+            >
+              🎤
+            </button>
+            <button
+              className="send-btn"
+              onClick={() => sendMessage()}
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg,#6366f1,#8b5cf6)',
+                border: 'none',
+                color: '#fff',
+                fontSize: '16px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                flexShrink: 0
+              }}
+            >
+              →
+            </button>
           </div>
         </div>
       )}
