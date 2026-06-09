@@ -5,7 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 const cardData = [
   { icon: "🩺", path: "/diabetes", accuracy: 72, color: "blue" },
   { icon: "❤️", path: "/heart", accuracy: 98, color: "red" },
-  { icon: "🫘", path: "/kidney", accuracy: 100, color: "green" },
+  { icon: "🫘", path: "/kidney", accuracy: 98, color: "green" },
   { icon: "🔬", path: "/xray", accuracy: 95, color: "purple" }
 ];
 
@@ -86,7 +86,6 @@ function Home() {
           background: 'rgba(3,4,10,0.85)',
           position: 'sticky', top: 0, zIndex: 100
         }}>
-          {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{
               width: '32px', height: '32px', borderRadius: '9px',
@@ -101,9 +100,7 @@ function Home() {
             }}>{t.appName}</span>
           </div>
 
-          {/* Right side buttons */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            {/* Language Toggle */}
             <button className="lang-btn" onClick={toggleLanguage} style={{
               background: 'rgba(255,255,255,0.06)',
               border: '1px solid rgba(255,255,255,0.1)',
@@ -113,16 +110,12 @@ function Home() {
             }}>
               {language === 'en' ? '🇮🇳 हिंदी' : '🇬🇧 EN'}
             </button>
-
-            {/* Dashboard */}
             <button className="btn-main" onClick={() => navigate('/dashboard')} style={{
               padding: '7px 12px', borderRadius: '100px',
               background: 'linear-gradient(135deg,#6366f1,#a855f7)',
               color: '#fff', fontSize: '11px', fontWeight: 600,
               boxShadow: '0 0 20px rgba(99,102,241,0.4)'
             }}>📊 {t.dashboardBtn.replace('📊 ', '')}</button>
-
-            {/* Hamburger */}
             <button onClick={() => setMenuOpen(!menuOpen)} style={{
               background: 'rgba(255,255,255,0.06)',
               border: '1px solid rgba(255,255,255,0.1)',
@@ -183,24 +176,18 @@ function Home() {
           <p style={{
             fontSize: '14px', color: 'rgba(255,255,255,0.45)',
             maxWidth: '420px', margin: '0 auto 32px', lineHeight: 1.8
-          }}>
-            {t.subtitle}
-          </p>
+          }}>{t.subtitle}</p>
 
           <div className="cta-row">
             <button className="btn-main cta-btn" onClick={() => navigate('/diabetes')} style={{
               background: 'linear-gradient(135deg,#6366f1,#8b5cf6)',
               color: '#fff', boxShadow: '0 0 30px rgba(99,102,241,0.45)'
-            }}>
-              {t.analyzeBtn}
-            </button>
+            }}>{t.analyzeBtn}</button>
             <button className="btn-sec cta-btn" onClick={() => navigate('/dashboard')} style={{
               background: 'rgba(255,255,255,0.04)',
               border: '1px solid rgba(255,255,255,0.1)',
               color: 'rgba(255,255,255,0.8)'
-            }}>
-              {t.dashboardBtn}
-            </button>
+            }}>{t.dashboardBtn}</button>
           </div>
 
           {/* Stats */}
@@ -208,7 +195,7 @@ function Home() {
             {[
               { val: '4', label: t.aiModels, g: 'linear-gradient(135deg,#818cf8,#c084fc)' },
               { val: '98%', label: t.bestAccuracy, g: 'linear-gradient(135deg,#f87171,#fb923c)' },
-              { val: '100%', label: t.kidneyScore, g: 'linear-gradient(135deg,#4ade80,#22d3ee)' },
+              { val: '98%', label: t.kidneyScore, g: 'linear-gradient(135deg,#4ade80,#22d3ee)' },
               { val: 'Free', label: t.alwaysOpen, g: 'linear-gradient(135deg,#fbbf24,#f472b6)' }
             ].map((s, i) => (
               <div key={i} style={{
@@ -239,9 +226,7 @@ function Home() {
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
             }}>{t.predictionModel}</span>
           </h2>
-          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
-            {t.trainedOn}
-          </p>
+          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>{t.trainedOn}</p>
         </div>
 
         {/* Cards */}

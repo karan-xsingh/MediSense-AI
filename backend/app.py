@@ -1,8 +1,7 @@
 import os
-import sys
-
-os.chdir('/home/Karan18singh/MediSense-AI')
-
+import sqlite3
+from datetime import datetime
+from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import numpy as np
@@ -12,7 +11,10 @@ import io
 import base64
 import warnings
 from groq import Groq
+from twilio.twiml.messaging_response import MessagingResponse
 warnings.filterwarnings('ignore')
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
@@ -21,7 +23,46 @@ CORS(app)
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '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')
 groq_client = Groq(api_key=GROQ_API_KEY)
 
-prediction_history = []
+# ===== SQLite Database =====
+def init_db():
+    conn = sqlite3.connect('medisense.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS predictions
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  type TEXT,
+                  result TEXT,
+                  confidence REAL,
+                  prediction INTEGER,
+                  timestamp TEXT)''')
+    conn.commit()
+    conn.close()
+
+def save_to_db(pred_type, result, confidence, prediction):
+    try:
+        conn = sqlite3.connect('medisense.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO predictions VALUES (NULL,?,?,?,?,?)",
+                  (pred_type, result, confidence, prediction,
+                   datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"DB error: {e}")
+
+def load_from_db():
+    try:
+        conn = sqlite3.connect('medisense.db')
+        c = conn.cursor()
+        c.execute("SELECT type, result, confidence, prediction, timestamp FROM predictions ORDER BY id DESC LIMIT 50")
+        rows = c.fetchall()
+        conn.close()
+        return [{"type": r[0], "result": r[1], "confidence": r[2], "prediction": r[3], "timestamp": r[4]} for r in rows]
+    except Exception as e:
+        print(f"DB error: {e}")
+        return []
+
+# Initialize DB
+init_db()
 
 # Load models
 print("Loading models...")
@@ -29,32 +70,34 @@ try:
     diabetes_model = joblib.load('models/diabetes_model.pkl')
     print("✅ Diabetes model loaded!")
 except Exception as e:
-    print(f"❌ Diabetes model error: {e}")
+    print(f"❌ Diabetes: {e}")
     diabetes_model = None
 
 try:
     heart_model = joblib.load('models/heart_model.pkl')
     print("✅ Heart model loaded!")
 except Exception as e:
-    print(f"❌ Heart model error: {e}")
+    print(f"❌ Heart: {e}")
     heart_model = None
 
 try:
     kidney_model = joblib.load('models/kidney_model.pkl')
     print("✅ Kidney model loaded!")
 except Exception as e:
-    print(f"❌ Kidney model error: {e}")
+    print(f"❌ Kidney: {e}")
     kidney_model = None
 
 xray_model = None
-print("⚠️ X-Ray model skipped (TensorFlow not available)")
+print("⚠️ X-Ray model skipped on server")
 print("✅ All available models loaded!")
 
+# Home route
 @app.route('/')
 def home():
     return jsonify({
         "message": "MediSense AI Backend Running!",
         "status": "success",
+        "version": "2.0",
         "models": {
             "diabetes": diabetes_model is not None,
             "heart": heart_model is not None,
@@ -63,16 +106,23 @@ def home():
         }
     })
 
+# History routes
 @app.route('/history', methods=['GET'])
 def get_history():
-    return jsonify(prediction_history)
+    return jsonify(load_from_db())
 
 @app.route('/history/add', methods=['POST'])
 def add_history():
     data = request.json
-    prediction_history.append(data)
+    save_to_db(
+        data.get('type', ''),
+        data.get('result', ''),
+        data.get('confidence', 0),
+        data.get('prediction', 0)
+    )
     return jsonify({"status": "saved"})
 
+# Diabetes prediction
 @app.route('/predict/diabetes', methods=['POST'])
 def predict_diabetes():
     if diabetes_model is None:
@@ -92,9 +142,10 @@ def predict_diabetes():
         "result": "Diabetic" if prediction == 1 else "Not Diabetic",
         "confidence": round(float(max(probability)) * 100, 2)
     }
-    prediction_history.append(result)
+    save_to_db(result['type'], result['result'], result['confidence'], result['prediction'])
     return jsonify(result)
 
+# Heart disease prediction
 @app.route('/predict/heart', methods=['POST'])
 def predict_heart():
     if heart_model is None:
@@ -114,9 +165,10 @@ def predict_heart():
         "result": "Heart Disease Detected" if prediction == 1 else "No Heart Disease",
         "confidence": round(float(max(probability)) * 100, 2)
     }
-    prediction_history.append(result)
+    save_to_db(result['type'], result['result'], result['confidence'], result['prediction'])
     return jsonify(result)
 
+# Kidney disease prediction
 @app.route('/predict/kidney', methods=['POST'])
 def predict_kidney():
     if kidney_model is None:
@@ -140,18 +192,38 @@ def predict_kidney():
         "result": "Kidney Disease Detected" if prediction == 1 else "No Kidney Disease",
         "confidence": round(float(max(probability)) * 100, 2)
     }
-    prediction_history.append(result)
+    save_to_db(result['type'], result['result'], result['confidence'], result['prediction'])
     return jsonify(result)
 
+# X-Ray prediction
 @app.route('/predict/xray', methods=['POST'])
 def predict_xray():
-    return jsonify({
+    if xray_model is None:
+        return jsonify({
+            "type": "X-Ray",
+            "result": "X-Ray analysis available on local version only",
+            "confidence": 0,
+            "prediction": 0
+        })
+    data = request.json
+    image_data = base64.b64decode(data['image'])
+    image = Image.open(io.BytesIO(image_data)).convert('RGB')
+    image = image.resize((150, 150))
+    image_array = np.array(image) / 255.0
+    image_array = np.expand_dims(image_array, axis=0)
+    prediction = xray_model.predict(image_array)[0][0]
+    result_text = "Pneumonia Detected" if prediction > 0.5 else "Normal"
+    confidence = round(float(prediction) * 100 if prediction > 0.5 else (1 - float(prediction)) * 100, 2)
+    result = {
         "type": "X-Ray",
-        "result": "X-Ray analysis available on local version only",
-        "confidence": 0,
-        "prediction": 0
-    })
+        "prediction": float(prediction),
+        "result": result_text,
+        "confidence": confidence
+    }
+    save_to_db(result['type'], result['result'], result['confidence'], int(prediction > 0.5))
+    return jsonify(result)
 
+# Test Groq
 @app.route('/test-groq')
 def test_groq():
     try:
@@ -164,6 +236,7 @@ def test_groq():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
+# Chat route
 @app.route('/chat', methods=['POST'])
 def chat():
     try:
@@ -173,7 +246,7 @@ def chat():
             messages=[
                 {
                     "role": "system",
-                    "content": """You are MediBot, a helpful healthcare AI assistant 
+                    "content": """You are MediBot, a helpful healthcare AI assistant
                     inside MediSense AI platform. You help users understand:
                     - Disease symptoms and prevention
                     - How to interpret their prediction results
@@ -183,10 +256,7 @@ def chat():
                     Always remind users to consult a real doctor for medical decisions.
                     Never diagnose diseases directly."""
                 },
-                {
-                    "role": "user",
-                    "content": user_message
-                }
+                {"role": "user", "content": user_message}
             ],
             max_tokens=500
         )
@@ -195,6 +265,36 @@ def chat():
     except Exception as e:
         print(f"Groq error: {str(e)}")
         return jsonify({"reply": f"Error: {str(e)}"}), 500
+
+# WhatsApp Bot
+@app.route('/whatsapp', methods=['POST'])
+def whatsapp():
+    incoming_msg = request.values.get('Body', '').strip()
+    try:
+        completion = groq_client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are MediBot, a healthcare AI assistant for MediSense AI India.
+                    Help users understand disease symptoms, prevention and health advice.
+                    Keep responses SHORT under 200 words as this is WhatsApp.
+                    If user writes in Hindi, respond in Hindi.
+                    If user writes in English, respond in English.
+                    Always recommend consulting a real doctor.
+                    End every message with: Visit medisense-india.vercel.app for AI predictions!"""
+                },
+                {"role": "user", "content": incoming_msg}
+            ],
+            max_tokens=300
+        )
+        reply = completion.choices[0].message.content
+    except Exception as e:
+        reply = "Sorry, I am having trouble. Please try again!"
+
+    resp = MessagingResponse()
+    resp.message(f"🏥 *MediBot*:\n\n{reply}")
+    return str(resp)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
