@@ -1,5 +1,4 @@
 ﻿# MediSense AI
-cat > README.md << 'EOF'
 # 🏥 MediSense AI
 
 > AI-Powered Healthcare Platform for Rural & Urban India
