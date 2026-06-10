@@ -1,0 +1,58 @@
+# 🏥 MediSense AI
+
+> AI-Powered Healthcare Platform for Rural & Urban India
+
+![Status](https://img.shields.io/badge/Status-Live-brightgreen)
+![Python](https://img.shields.io/badge/Python-3.13-blue)
+![React](https://img.shields.io/badge/React-18-61dafb)
+
+## 🌍 Live Demo
+- **App:** https://medisense-india.vercel.app
+- **API:** https://karan18singh.pythonanywhere.com
+- **WhatsApp:** +1 415 523 8886
+
+## 📊 Model Performance
+
+| Disease | Algorithm | Accuracy | CV Score |
+|---------|-----------|----------|----------|
+| Diabetes | Gradient Boosting | 74% | 76% ± 2.9% |
+| Heart Disease | Random Forest | 98% | 97% ± 1.2% |
+| Kidney Disease | Random Forest | 98% | 99% ± 1.0% |
+| Chest X-Ray | CNN (4 layers) | 95% | - |
+
+## 🚀 Features
+- 🩺 4 ML/DL Disease Prediction Models
+- 🤖 MediBot AI Chatbot (Groq LLaMA)
+- 📱 WhatsApp Bot via Twilio
+- 🇮🇳 Hindi/English language toggle
+- 🎤 Voice Input support
+- 📊 Real-time Analytics Dashboard
+- 💾 SQLite Database
+- 📱 Mobile Responsive
+
+## 🛠️ Tech Stack
+- **Backend:** Python, Flask, SQLite, Scikit-learn, TensorFlow
+- **Frontend:** React.js, Tailwind CSS, Recharts
+- **AI:** Groq API (LLaMA 3.3 70B), Twilio
+- **Deploy:** Vercel + PythonAnywhere
+
+## 🔧 Local Setup
+
+### Backend
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python app.py
+```
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm start
+```
+
+## 👨‍💻 Developer
+**Karan Singh** | B.Tech CSE (AI/ML) | DBS Global University
