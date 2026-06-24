@@ -24,3 +24,8 @@ backend/.env
 
 # Misc
 .DS_Store
+backend/.eve
+
+backend/.env
+
+*.env
