@@ -20,7 +20,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Groq Client
-GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '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')
+GROQ_API_KEY = os.getenv('GROQ_API_KEY', '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')
 groq_client = Groq(api_key=GROQ_API_KEY)
 
 # ===== SQLite Database =====

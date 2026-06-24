@@ -17,7 +17,7 @@ load_dotenv()
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
-FIREWORKS_API_KEY = ("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")
+FIREWORKS_API_KEY = os.getenv("GROQ_API_KEY", "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")
 FIREWORKS_URL     = "https://api.groq.com/openai/v1/chat/completions"
 MODEL_ID          = "llama-3.3-70b-versatile"
 
