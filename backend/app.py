@@ -20,7 +20,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Groq Client
-GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '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')
 groq_client = Groq(api_key=GROQ_API_KEY)
 
 # ===== SQLite Database =====
@@ -295,6 +295,89 @@ def whatsapp():
     resp = MessagingResponse()
     resp.message(f"🏥 *MediBot*:\n\n{reply}")
     return str(resp)
+
+# ── AI Doctor endpoint ────────────────────────────────────────────────────────
+@app.route('/doctor/chat', methods=['POST'])
+def doctor_chat():
+    data = request.get_json()
+    question = data.get('question', '')
+    language = data.get('language', 'en')
+    chat_history = data.get('chat_history', [])
+    
+    lang_note = "Respond in Hindi using Devanagari script." if language == "hi" else "Respond in English."
+    
+    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    
+    messages = [{
+        "role": "system",
+        "content": f"""You are Dr. MediSense AI, an expert doctor. {lang_note}
+        
+For every query respond with:
+🔍 **POSSIBLE CONDITIONS:** [2-3 conditions]
+💊 **MEDICINES:** [Common medicines - say consult doctor first]
+🥗 **DIET:** [What to eat/avoid]
+⚠️ **WARNING SIGNS:** [When to see doctor immediately]
+🏥 **SPECIALIST:** [Which doctor to see]"""
+    }]
+    
+    for msg in chat_history[-6:]:
+        messages.append(msg)
+    messages.append({"role": "user", "content": question})
+    
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=messages,
+            max_tokens=1024
+        )
+        return jsonify({
+            "response": response.choices[0].message.content,
+            "powered_by": "LLaMA 3.3 70B on AMD MI300X via Groq"
+        })
+    except Exception as e:
+        return jsonify({"response": f"Error: {str(e)}"}), 500
+
+
+# ── Medicine Reminder endpoint ─────────────────────────────────────────────────
+@app.route('/reminders/add', methods=['POST'])
+def add_reminder():
+    data = request.get_json()
+    phone = data.get('phone')
+    medicine = data.get('medicine')
+    patient_name = data.get('patient_name', 'Patient')
+    reminder_time = data.get('reminder_time')
+    
+    try:
+        from twilio.rest import Client
+        client = Client(os.getenv("TWILIO_ACCOUNT_SID"), os.getenv("TWILIO_AUTH_TOKEN"))
+        
+        message = (
+            f"💊 *MediSense AI Medicine Reminder*\n\n"
+            f"Hello {patient_name}! 👋\n\n"
+            f"⏰ Time to take: *{medicine}*\n\n"
+            f"Stay healthy! 🌟\n"
+            f"_MediSense AI Healthcare_ 🤖"
+        )
+        
+        client.messages.create(
+            from_="whatsapp:+14155238886",
+            to=f"whatsapp:{phone}",
+            body=message
+        )
+        
+        reminder_id = str(datetime.now().timestamp())[:8]
+        return jsonify({
+            "success": True,
+            "reminder": {
+                "id": reminder_id,
+                "phone": phone,
+                "medicine": medicine,
+                "patient_name": patient_name,
+                "time": reminder_time
+            }
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

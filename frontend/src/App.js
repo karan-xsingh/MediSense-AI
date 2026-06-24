@@ -8,6 +8,8 @@ import Kidney from './pages/Kidney';
 import XRay from './pages/XRay';
 import Dashboard from './pages/Dashboard';
 import Chatbot from './components/Chatbot';
+import MediSenseAgent from './pages/MediSenseAgent';
+import AiDoctor from './pages/AiDoctor';
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
           <Route path="/kidney" element={<Kidney />} />
           <Route path="/xray" element={<XRay />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/agent" element={<MediSenseAgent />} />
+          <Route path="/doctor" element={<AiDoctor />} />
         </Routes>
         <Chatbot />
       </Router>

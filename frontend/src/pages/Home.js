@@ -11,7 +11,8 @@ const cardData = [
 
 const techs = [
   "⚛️ React", "🐍 Flask", "🤖 TensorFlow",
-  "📊 Scikit-learn", "🧠 Random Forest", "🔬 CNN"
+  "📊 Scikit-learn", "🧠 Random Forest", "🔬 CNN",
+  "🔴 AMD MI300X", "⚡ Fireworks AI"
 ];
 
 const colorMap = {
@@ -188,6 +189,16 @@ function Home() {
               border: '1px solid rgba(255,255,255,0.1)',
               color: 'rgba(255,255,255,0.8)'
             }}>{t.dashboardBtn}</button>
+            <button className="btn-main cta-btn" onClick={() => navigate('/agent')} style={{
+              background: 'linear-gradient(135deg,#7c3aed,#2563eb)',
+              color: '#fff',
+              boxShadow: '0 0 30px rgba(124,58,237,0.45)'
+            }}>🤖 AMD AI Agent</button>
+            <button className="btn-main cta-btn" onClick={() => navigate('/doctor')} style={{
+              background: 'linear-gradient(135deg,#059669,#0891b2)',
+              color: '#fff',
+              boxShadow: '0 0 30px rgba(5,150,105,0.45)'
+            }}>👨‍⚕️ AI Doctor</button>
           </div>
 
           {/* Stats */}
@@ -196,7 +207,9 @@ function Home() {
               { val: '4', label: t.aiModels, g: 'linear-gradient(135deg,#818cf8,#c084fc)' },
               { val: '98%', label: t.bestAccuracy, g: 'linear-gradient(135deg,#f87171,#fb923c)' },
               { val: '98%', label: t.kidneyScore, g: 'linear-gradient(135deg,#4ade80,#22d3ee)' },
-              { val: 'Free', label: t.alwaysOpen, g: 'linear-gradient(135deg,#fbbf24,#f472b6)' }
+              { val: 'Free', label: t.alwaysOpen, g: 'linear-gradient(135deg,#fbbf24,#f472b6)' },
+              { val: '600+', label: 'Real Users', g: 'linear-gradient(135deg,#f87171,#fb923c)' },
+              { val: '9', label: 'Countries', g: 'linear-gradient(135deg,#4ade80,#22d3ee)' }
             ].map((s, i) => (
               <div key={i} style={{
                 padding: '20px 10px', textAlign: 'center',
