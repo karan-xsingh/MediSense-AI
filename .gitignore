@@ -29,3 +29,9 @@ backend/.eve
 backend/.env
 
 *.env
+
+.env
+
+backend/.env
+
+backend/.eve

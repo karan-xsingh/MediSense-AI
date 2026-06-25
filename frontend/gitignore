@@ -1,0 +1,26 @@
+# Environment files
+.env
+*.env
+backend/.env
+backend/.eve
+frontend/.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+
+# Node
+node_modules/
+build/
+
+# Models (too large)
+*.h5
+datasets/
+uploads/
+
+# OS
+.DS_Store
+Thumbs.db
