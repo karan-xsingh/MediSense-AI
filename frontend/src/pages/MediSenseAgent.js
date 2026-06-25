@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { generatePDFReport } from '../PDFReport';
 
 const API_URL = 'https://karan18singh.pythonanywhere.com';
 
@@ -462,8 +463,25 @@ function MediSenseAgent() {
                 </div>
 
                 {/* Disclaimer */}
+                
+
+                // Add download button before disclaimer
+                <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+                  <button
+                    onClick={() => generatePDFReport(result)}
+                    style={{
+                      background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                      border: 'none', borderRadius: '12px',
+                      padding: '12px 32px', color: '#fff',
+                      fontSize: '15px', fontWeight: 700,
+                      cursor: 'pointer', boxShadow: '0 0 20px rgba(99,102,241,0.4)'
+                      }}>
+                    📄 Download Clinical Report PDF
+                  </button>
+                </div>
                 <p className="text-center text-gray-500 text-xs">
                   ⚕️ This is an AI-powered screening tool. Always consult a qualified doctor for medical advice.
+
                 </p>
               </div>
             )}
@@ -471,6 +489,7 @@ function MediSenseAgent() {
         )}
       </div>
     </div>
+
   );
 }
 
