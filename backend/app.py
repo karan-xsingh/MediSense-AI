@@ -20,7 +20,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Groq Client
-GROQ_API_KEY = os.getenv('GROQ_API_KEY', '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')
+GROQ_API_KEY = os.getenv('GROQ_API_KEY')
 groq_client = Groq(api_key=GROQ_API_KEY)
 
 # ===== SQLite Database =====
@@ -346,25 +346,39 @@ def add_reminder():
     medicine = data.get('medicine')
     patient_name = data.get('patient_name', 'Patient')
     reminder_time = data.get('reminder_time')
-    
+
+    # Validate inputs
+    if not phone or not medicine:
+        return jsonify({"success": False, "error": "Phone and medicine required"}), 400
+
+    # Clean phone number
+    phone = phone.strip()
+    if not phone.startswith('+'):
+        phone = '+91' + phone  # Add India code if missing
+
     try:
         from twilio.rest import Client
-        client = Client(os.getenv("TWILIO_ACCOUNT_SID"), os.getenv("TWILIO_AUTH_TOKEN"))
-        
+        client = Client(
+            os.getenv("TWILIO_ACCOUNT_SID"),
+            os.getenv("TWILIO_AUTH_TOKEN")
+        )
+
         message = (
             f"💊 *MediSense AI Medicine Reminder*\n\n"
             f"Hello {patient_name}! 👋\n\n"
-            f"⏰ Time to take: *{medicine}*\n\n"
-            f"Stay healthy! 🌟\n"
-            f"_MediSense AI Healthcare_ 🤖"
+            f"⏰ Reminder set for: *{reminder_time}*\n"
+            f"💊 Medicine: *{medicine}*\n\n"
+            f"We'll remind you to take your medicine on time!\n"
+            f"Stay healthy! 🌟\n\n"
+            f"_MediSense AI — medisense-india.vercel.app_ 🤖"
         )
-        
+
         client.messages.create(
             from_="whatsapp:+14155238886",
             to=f"whatsapp:{phone}",
             body=message
         )
-        
+
         reminder_id = str(datetime.now().timestamp())[:8]
         return jsonify({
             "success": True,
@@ -377,7 +391,7 @@ def add_reminder():
             }
         })
     except Exception as e:
+        print(f"Reminder error: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
-
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

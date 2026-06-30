@@ -208,7 +208,7 @@ function Home() {
               { val: '98%', label: t.bestAccuracy, g: 'linear-gradient(135deg,#f87171,#fb923c)' },
               { val: '98%', label: t.kidneyScore, g: 'linear-gradient(135deg,#4ade80,#22d3ee)' },
               { val: 'Free', label: t.alwaysOpen, g: 'linear-gradient(135deg,#fbbf24,#f472b6)' },
-              { val: '600+', label: 'Real Users', g: 'linear-gradient(135deg,#f87171,#fb923c)' },
+              { val: '869+', label: 'Real Users', g: 'linear-gradient(135deg,#f87171,#fb923c)' },
               { val: '9', label: 'Countries', g: 'linear-gradient(135deg,#4ade80,#22d3ee)' }
             ].map((s, i) => (
               <div key={i} style={{
