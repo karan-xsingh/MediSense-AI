@@ -52,3 +52,45 @@
 - Version Control: GitHub
 
 ## 📁 Project Structure
+## 📁 Project Structure
+
+```
+MediSense-AI/
+├── backend/                      # Flask API server
+│   ├── app.py                    # Main Flask app & API routes
+│   ├── agent.py                  # MediBot AI agent logic
+│   ├── doctor.py                 # AI Doctor / diagnosis logic
+│   ├── config.py                 # App configuration
+│   ├── reminders.py               # Medication/appointment reminders
+│   ├── utils.py                   # Shared helper functions
+│   ├── model_evaluation.py        # ML model evaluation scripts
+│   ├── API_DOCS.md                # API endpoint documentation
+│   ├── requirements.txt           # Python dependencies
+│   └── .env.example               # Environment variable template
+│
+├── frontend/                      # React + Tailwind client
+│   ├── public/                    # Static assets
+│   └── src/
+│       ├── App.js                 # Root component & routing
+│       ├── AiDoctor.js            # AI Doctor interface
+│       ├── MediSenseAgent.js      # MediBot chat interface
+│       ├── PDFReport.js           # PDF report generation
+│       ├── components/
+│       │   └── Chatbot.js         # Chat UI component
+│       ├── context/
+│       │   └── LanguageContext.js # Hindi/English toggle state
+│       └── pages/                 # Route-level pages
+│           ├── Home.js
+│           ├── Dashboard.js
+│           ├── Diabetes.js
+│           ├── Heart.js
+│           ├── Kidney.js
+│           ├── XRay.js
+│           ├── AiDoctor.js
+│           └── MediSenseAgent.js
+│
+├── notebooks/
+│   └── train_models.ipynb         # Model training notebook
+│
+└── README.md
+```
